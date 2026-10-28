@@ -9,8 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "antd": "^6.6.8",
     "next": "16.4.3",
+    "pg": "^8.23.1",
+    "prisma": "^7.10.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
