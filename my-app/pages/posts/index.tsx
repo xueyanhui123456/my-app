@@ -2,8 +2,6 @@ import { Table, Button, Modal, Form, Input, Space } from "antd";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-const AUTHOR_ID = "cmvrigo5f0000xoorw7lkya57";
-
 type Post = { id: string; title: string; content: string };
 
 // 放到组件外：只负责请求，不碰 state。
@@ -79,7 +77,6 @@ export default function PostsList() {
     form.setFieldsValue({
       title: isAdd ? "" : currentPost.title,
       content: isAdd ? "" : currentPost.content,
-      authorId: AUTHOR_ID,
     });
   }, [isModalOpen, isAdd, currentPost, form]);
 
@@ -131,10 +128,7 @@ export default function PostsList() {
     handleOpenModal();
   };
 
-  const handleAddPost = async (values: {
-    title: string;
-    content: string;
-  }) => {
+  const handleAddPost = async (values: { title: string; content: string }) => {
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -165,11 +159,7 @@ export default function PostsList() {
         onCancel={handleCloseModal}
         footer={null}
       >
-        <Form
-          form={form}
-          initialValues={{ authorId: AUTHOR_ID }}
-          onFinish={isAdd ? handleAddPost : handleUpdatePost}
-        >
+        <Form form={form} onFinish={isAdd ? handleAddPost : handleUpdatePost}>
           <Form.Item
             label="博客标题"
             name="title"
