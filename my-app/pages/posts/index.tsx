@@ -1,5 +1,6 @@
 import { Table, Button, Modal, Form, Input, Space } from "antd";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 const AUTHOR_ID = "cmvrigo5f0000xoorw7lkya57";
 
@@ -15,6 +16,7 @@ async function fetchPosts(): Promise<Post[]> {
 }
 
 export default function PostsList() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -35,11 +37,17 @@ export default function PostsList() {
       key: "action",
       render: (_: unknown, record: Post) => (
         <Space>
-          <Button type="link"  onClick={() => handleUpdate(record)}>
+          <Button type="link" onClick={() => handleUpdate(record)}>
             编辑
           </Button>
           <Button type="link" danger onClick={() => handleDelete(record.id)}>
             删除
+          </Button>
+          <Button
+            type="link"
+            onClick={() => router.push(`/posts/${record.id}`)}
+          >
+            查看详情
           </Button>
         </Space>
       ),
@@ -82,7 +90,10 @@ export default function PostsList() {
     handleOpenModal();
   };
 
-  const handleUpdatePost = async (values: { title: string; content: string }) => {
+  const handleUpdatePost = async (values: {
+    title: string;
+    content: string;
+  }) => {
     if (!currentPost.id) return;
 
     const res = await fetch(`/api/posts/${currentPost.id}`, {
@@ -123,7 +134,6 @@ export default function PostsList() {
   const handleAddPost = async (values: {
     title: string;
     content: string;
-    authorId: string;
   }) => {
     const res = await fetch("/api/posts", {
       method: "POST",
@@ -174,13 +184,7 @@ export default function PostsList() {
           >
             <Input />
           </Form.Item>
-          <Form.Item
-            label="作者ID"
-            name="authorId"
-            rules={[{ required: true, message: "Please input the author ID!" }]}
-          >
-            <Input readOnly />
-          </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit">
               提交
