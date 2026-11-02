@@ -1,7 +1,7 @@
+export const runtime = 'nodejs';
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-export const runtime = 'nodejs';
 
 export default async function handler(
   req: NextApiRequest,

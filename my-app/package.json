@@ -9,16 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "@prisma/adapter-neon": "^7.10.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "antd": "^6.6.8",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.9",
     "next": "16.4.3",
     "next-auth": "^4.24.15",
     "pg": "^8.23.1",
     "prisma": "^7.10.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "ws": "^8.22.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

@@ -1,10 +1,9 @@
+export const runtime = 'nodejs';
 // 配置NextAuth(核心)
-
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-export const runtime = 'nodejs';
 
 
 export const authOptions: NextAuthOptions = {
