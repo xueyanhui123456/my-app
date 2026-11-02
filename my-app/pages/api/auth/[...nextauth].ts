@@ -1,9 +1,10 @@
+export const runtime = 'nodejs';
 // 配置NextAuth(核心)
-
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -22,6 +23,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("邮箱和密码是必填项");
         }
 
+        console.log("=== DB URL CHECK ==2222=", process.env.DATABASE_URL);
         // 1.根据邮箱找用户
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
