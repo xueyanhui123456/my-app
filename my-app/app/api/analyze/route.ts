@@ -1,17 +1,14 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
-const customProvider = createOpenAI({
-  baseURL: process.env.OPENAI_BASE_URL || "https://api.deepseek.com/v1",
-  apiKey: process.env.OPEN_AI_API_KEY,
+const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY,
 });
-
 export async function POST(req: Request) {
   const { text } = await req.json();
 
   // 定义期望的JSON结构
-
   const schema = z.object({
     sentiment: z
       .enum(["positive", "negative", "neutral"])
@@ -23,10 +20,18 @@ export async function POST(req: Request) {
 
   try {
     const result = await generateObject({
-      model: customProvider("deepseek-chat"),
+      model: openrouter("openrouter/free"), // 零配置，无需API Key
       schema,
       prompt: `请分析以下内容：${text}`,
+      // 可选：加个 system prompt 让模型更听话
+      system: "你是一个专业的数据提取助手，请严格按 JSON 格式返回数据。",
     });
+    // const result = await generateObject({
+    //   model: customProvider("deepseek-chat"),
+    //   schema,
+    //   prompt: `提取标签时，必须控制在两个字以内。回复话术要像淘宝客服一样亲切。请分析以下内容：${text}`,
+    // });
+
     return Response.json(result.object);
   } catch (error: unknown) {
     return Response.json({ error: (error as Error).message }, { status: 500 });

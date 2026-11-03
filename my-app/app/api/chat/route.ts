@@ -1,26 +1,24 @@
 // app/api/chat/route.ts
-import { createOpenAI } from "@ai-sdk/openai";
 import {
-  streamText,
-  convertToModelMessages,
-  UIMessage,
-  createUIMessageStreamResponse,
+  streamText, convertToModelMessages, UIMessage, createUIMessageStreamResponse 
 } from "ai";
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
 // 初始化兼容 OpenAI 协议的 Provider（以 DeepSeek 为例）
-const customProvider = createOpenAI({
-  baseURL: process.env.OPENAI_BASE_URL || "https://api.deepseek.com/v1",
-  apiKey: process.env.OPEN_AI_API_KEY,
+const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY,
 });
 
 export async function POST(req: Request) {
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
 
-    // 调用模型生成流
-    const result = await streamText({
-      model: customProvider("deepseek-chat"), // 如果你用 OpenAI 或其他，改这里
-      messages: await convertToModelMessages(messages), // v7 必须把 UIMessage 转为 ModelMessage
+     const result = await streamText({
+      // 直接使用 free 路由，它会自动挑一个能用的免费文本模型
+      model: openrouter('openrouter/free'), 
+      messages: await convertToModelMessages(messages),
+      // 免费模型有时候会抽风，可以加一点系统提示词让它别废话
+      system: '你是一个乐于助人的 AI 助手。请简短、直接地回答用户。',
     });
 
     // v7 的最新写法：返回流式响应
