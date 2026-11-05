@@ -4,9 +4,15 @@ import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
+  // 👇 关键：开启 externalTables 实验特性，否则 initShadowDb 无法使用
+  experimental: {
+    externalTables: true,
+  },
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    // 关键：告诉Prisma在影子数据库中先安装pgvector扩展
+    initShadowDb: "CREATE EXTENSION IF NOT EXISTS vector;",
   },
   datasource: {
     // 使用非池化（直连）URL 供 Prisma CLI 使用
