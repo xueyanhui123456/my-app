@@ -1,0 +1,6 @@
+POST http://localhost:3000/api/rag/ingest
+Content-Type: application/json
+
+{
+   "text": "我叫李四，是一名前端开发工程师。我平时最喜欢用的框架是Next.js，因为它结合了React和Node.js的能力。我正在学习AI应用开发，目标是成为一名全栈AI工程师。我最近在研究的课题是RAG技术，也就是检索增强生成。"
+}
