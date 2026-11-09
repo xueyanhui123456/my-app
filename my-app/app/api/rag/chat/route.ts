@@ -8,7 +8,6 @@ import {
   createUIMessageStream,
 } from "ai";
 import { prisma } from "@/lib/prisma";
-import { ca } from "zod/v4/locales";
 
 // 1.硅基流动（用于把输入的问题变成向量）
 const siliconflow = createOpenAI({
