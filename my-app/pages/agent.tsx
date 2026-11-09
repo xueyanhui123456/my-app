@@ -113,7 +113,6 @@ export default function AgentPage() {
                     }}
                     styles={{ body: { padding: "12px 16px" } }}
                   >
-                    {/* 核心：遍历 parts 数组 */}
                     {message.parts.map((part, idx) => {
                       // 1. 渲染普通文本
                       if (part.type === "text") {
@@ -132,9 +131,12 @@ export default function AgentPage() {
                         );
                       }
 
-                      // 2. 渲染 Agent 的工具调用过程
-                      if (part.type === "tool-invocation") {
-                        const isRunning = part.state === "call";
+                      // 2. 渲染 Agent 的工具调用过程（匹配以 'tool-' 开头的类型）
+                      if (part.type.startsWith("tool-")) {
+                        const toolName = part.type.replace("tool-", "");
+                        // 截图中显示状态叫 'output-available'，代表执行完成
+                        const isDone =
+                          (part as any).state === "output-available";
 
                         return (
                           <div
@@ -148,22 +150,14 @@ export default function AgentPage() {
                             }}
                           >
                             <div style={{ marginBottom: 8 }}>
-                              <Tag
-                                icon={
-                                  isRunning ? (
-                                    <Spin size="small" />
-                                  ) : (
-                                    <ToolOutlined />
-                                  )
-                                }
-                                color="orange"
-                              >
-                                {isRunning
-                                  ? `正在调用工具: ${part.toolName}`
-                                  : `工具 ${part.toolName} 执行完毕`}
+                              <Tag color="orange">
+                                {isDone
+                                  ? `✅ 工具 ${toolName} 执行完毕`
+                                  : `⏳ 正在调用工具: ${toolName}`}
                               </Tag>
                             </div>
 
+                            {/* 截图里入参叫 input */}
                             <div
                               style={{
                                 fontSize: 13,
@@ -172,10 +166,11 @@ export default function AgentPage() {
                               }}
                             >
                               <strong>📥 输入参数：</strong>{" "}
-                              {JSON.stringify(part.args)}
+                              {JSON.stringify((part as any).input)}
                             </div>
 
-                            {part.state === "result" && (
+                            {/* 截图里结果叫 output */}
+                            {isDone && (
                               <div
                                 style={{
                                   marginTop: 8,
@@ -188,7 +183,7 @@ export default function AgentPage() {
                                 }}
                               >
                                 <strong>📤 返回结果：</strong>{" "}
-                                {JSON.stringify(part.result)}
+                                {JSON.stringify((part as any).output)}
                               </div>
                             )}
                           </div>
