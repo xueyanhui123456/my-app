@@ -23,6 +23,7 @@ export async function POST(req: Request) {
         "你是一个贴心的天气穿搭助手。如果用户问天气，请务必调用getWeather工具获取真实数据，再给出建议。",
       messages: await convertToModelMessages(messages),
       tools: {
+        // 查看天气
         getWeather: tool({
           description: "获取指定城市的实时天气和温度",
           // parameters 用来约束AI传过来的参数格式
@@ -46,6 +47,27 @@ export async function POST(req: Request) {
               temperature: 10,
               suggestion: "穿羽绒服吧",
             };
+          },
+        }),
+
+        // 搜索博客文章
+        searchPost: tool({
+          description: "在博客知识库中搜索相关的技术文章",
+          inputSchema: z.object({
+            keyword: z.string().describe("搜索关键词，例如：RAG,react,AI"),
+          }),
+          execute: async ({ keyword }) => {
+            console.log(`📝 AI 决定搜索博客，关键词：${keyword}`);
+            // 模拟查询数据库
+            if (keyword.includes("RAG")) {
+              return {
+                results: [
+                  "《从零手写 RAG：前端工程师的逆袭》",
+                  "《pgvector 踩坑指南》",
+                ],
+              };
+            }
+            return { results: ["暂无相关文章"] };
           },
         }),
       },
