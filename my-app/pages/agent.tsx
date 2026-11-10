@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport,lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { useState, useRef, useEffect } from "react";
 import {
   Input,
@@ -20,7 +20,6 @@ import {
   RobotOutlined,
   SendOutlined,
   StopOutlined,
-  ToolOutlined,
 } from "@ant-design/icons";
 
 const { Text } = Typography;
@@ -31,8 +30,16 @@ export default function AgentPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 这里的 api 路径指向我们刚刚写的 Agent 接口
-  const { messages, sendMessage, status, stop, error } = useChat({
+  const {
+    messages,
+    sendMessage,
+    status,
+    stop,
+    error,
+    addToolApprovalResponse,
+  } = useChat({
     transport: new DefaultChatTransport({ api: "/api/agent" }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses, // 👈 关键配置
   });
 
   const isStreaming = status === "streaming";
@@ -131,12 +138,15 @@ export default function AgentPage() {
                         );
                       }
 
-                      // 2. 渲染 Agent 的工具调用过程（匹配以 'tool-' 开头的类型）
+                      // 2. 渲染 Agent 的工具调用过程
                       if (part.type.startsWith("tool-")) {
                         const toolName = part.type.replace("tool-", "");
-                        // 截图中显示状态叫 'output-available'，代表执行完成
-                        const isDone =
-                          (part as any).state === "output-available";
+                        const toolState = (part as any).state;
+
+                        // 👇 判断是否处于等待确认的状态
+                        const isWaitingApproval =
+                          toolState === "approval-requested";
+                        const isDone = toolState === "output-available";
 
                         return (
                           <div
@@ -150,14 +160,15 @@ export default function AgentPage() {
                             }}
                           >
                             <div style={{ marginBottom: 8 }}>
-                              <Tag color="orange">
-                                {isDone
-                                  ? `✅ 工具 ${toolName} 执行完毕`
-                                  : `⏳ 正在调用工具: ${toolName}`}
+                              <Tag color={isWaitingApproval ? "red" : "orange"}>
+                                {isWaitingApproval
+                                  ? `⚠️ 需要确认: ${toolName}`
+                                  : isDone
+                                    ? `✅ 工具 ${toolName} 执行完毕`
+                                    : `⏳ 正在调用工具: ${toolName}`}
                               </Tag>
                             </div>
 
-                            {/* 截图里入参叫 input */}
                             <div
                               style={{
                                 fontSize: 13,
@@ -169,7 +180,37 @@ export default function AgentPage() {
                               {JSON.stringify((part as any).input)}
                             </div>
 
-                            {/* 截图里结果叫 output */}
+                            {/* 👇 如果等待确认，渲染同意/拒绝按钮 */}
+                            {isWaitingApproval && (
+                              <Space style={{ marginTop: 12 }}>
+                                <Button
+                                  type="primary"
+                                  size="small"
+                                  onClick={() =>
+                                    addToolApprovalResponse({
+                                      id: (part as any).approval.id,
+                                      approved: true,
+                                    })
+                                  }
+                                >
+                                  同意发送
+                                </Button>
+                                <Button
+                                  danger
+                                  size="small"
+                                  onClick={() =>
+                                    addToolApprovalResponse({
+                                      id: (part as any).approval.id,
+                                      approved: false,
+                                    })
+                                  }
+                                >
+                                  拒绝
+                                </Button>
+                              </Space>
+                            )}
+
+                            {/* 如果执行完了，显示结果 */}
                             {isDone && (
                               <div
                                 style={{
@@ -189,7 +230,6 @@ export default function AgentPage() {
                           </div>
                         );
                       }
-
                       return null;
                     })}
                   </Card>
