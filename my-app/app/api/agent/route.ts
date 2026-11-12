@@ -8,6 +8,7 @@ import {
 } from "ai";
 import { z } from "zod";
 import { createOpenAI } from "@ai-sdk/openai";
+import nodemailer from "nodemailer";
 
 const deepseek = createOpenAI({
   baseURL: "https://api.deepseek.com/v1",
@@ -81,10 +82,36 @@ export async function POST(req: Request) {
           }),
           needsApproval: true,
           execute: async ({ to, subject, content }) => {
-            console.log(
-              `📧 真的发送邮件了！发给: ${to}，发送主题是${subject}，发送内容是${content}`,
-            );
-            return { success: true, message: "邮件发送成功" };
+            // console.log(
+            //   `📧 真的发送邮件了！发给: ${to}，发送主题是${subject}，发送内容是${content}`,
+            // );
+            try {
+              // 1.创建发送器
+              const transporter = nodemailer.createTransport({
+                host: "smtp.163.com",
+                port: 465,
+                secure: true,
+                auth: {
+                  user: process.env.EMAIL_USER,
+                  pass: process.env.EMAIL_PASS,
+                },
+              });
+              // 2.真正发送邮件
+              const info = await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to,
+                subject,
+                text: content,
+              });
+              return {
+                success: true,
+                message: "邮件发送成功",
+                messageId: info.messageId,
+              };
+            } catch (error) {
+              console.error("📧 邮件发送失败:", error);
+              return { success: false, message: "发送失败，请检查配置" };
+            }
           },
         }),
       },
