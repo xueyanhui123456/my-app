@@ -14,7 +14,6 @@ export default async function handler(
   if (!email || !password) {
     return res.status(400).json({ error: "邮箱和密码是必填项" });
   }
-console.log("=== DB URL CHECK ===", process.env.DATABASE_URL);
   // 1.检查邮箱是否被注册过
   const existingEmail = await prisma.user.findUnique({
     where: { email },
